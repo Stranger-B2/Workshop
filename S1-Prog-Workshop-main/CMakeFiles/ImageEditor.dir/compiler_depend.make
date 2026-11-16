@@ -195,6 +195,7 @@ CMakeFiles/ImageEditor.dir/lib/random.cpp.o: lib/random.cpp \
   /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h
 
 CMakeFiles/ImageEditor.dir/src/main.cpp.o: src/main.cpp \
+  lib/random.hpp \
   lib/sil/include/sil/sil.hpp \
   lib/sil/lib/glm/glm/common.hpp \
   lib/sil/lib/glm/glm/detail/_fixes.hpp \
