@@ -1,0 +1,11 @@
+{
+	"InstallScripts" : 
+	[
+		"/mnt/c/____tempo/IMAC/prog/workshop/Workshop/S1-Prog-Workshop-main/cmake_install.cmake",
+		"/mnt/c/____tempo/IMAC/prog/workshop/Workshop/S1-Prog-Workshop-main/lib/sil/cmake_install.cmake",
+		"/mnt/c/____tempo/IMAC/prog/workshop/Workshop/S1-Prog-Workshop-main/lib/sil/lib/glm/cmake_install.cmake",
+		"/mnt/c/____tempo/IMAC/prog/workshop/Workshop/S1-Prog-Workshop-main/lib/sil/lib/glm/glm/cmake_install.cmake",
+		"/mnt/c/____tempo/IMAC/prog/workshop/Workshop/S1-Prog-Workshop-main/lib/sil/lib/img/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
