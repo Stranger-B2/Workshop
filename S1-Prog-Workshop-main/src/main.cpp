@@ -1,6 +1,7 @@
 #include <sil/sil.hpp>
 #include <iostream>
 #include "random.hpp"
+#include <math.h>
 
 void Green(sil::Image im){
     for (int x{0}; x < im.width(); ++x)
@@ -101,7 +102,7 @@ void Miroir(sil::Image im){
             std::swap( im.pixel(x, y),  im.pixel(im.width()-x-1, y));
         }
     }
-    im.save("output/Miroir.png");
+    im.save("output/Star2/Miroir.png");
 }
 void Sound(sil::Image im){
     float x;
@@ -114,22 +115,91 @@ void Sound(sil::Image im){
         im.pixel(x,y).b = random_float(0, 1);
 
     }
-    im.save("output/Sound.png");
+    im.save("output/Star2/Sound.png");
 }
-void Rotation(sil::Image image){
-    sil::Image im{im.height(), im.width()};
+void Rotation(sil::Image im){
+    sil::Image NewIm{im.height(), im.width()};
     for (int x{0}; x < im.width(); ++x)
     {
         for (int y{0}; y < im.height(); ++y)
         {
-            
+            NewIm.pixel(y,x) = im.pixel(x,y);
         }
     }
+    NewIm.save("output/Star2/rotation.png");
+}
+void Dephasage(sil::Image im){
+    sil::Image NewIm{im.height(), im.width()};
+    NewIm = im;
+    int decal = im.width()/10;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            NewIm.pixel(x,y).r = ((x-decal >= 0)?im.pixel(x-decal,y).r:0.0f);
+            NewIm.pixel(x,y).b = ((x+decal < im.width())?im.pixel(x+decal,y).b:0.0f);
+            //NewIm.pixel(x,y).g = (im.pixel(x,y).g*2 > 1.0f)?im.pixel(x,y).g*2:1.0f;
+        }
+    }
+    NewIm.save("output/Star2/dephaser.png");
+}
+void Luminosite(sil::Image im, bool type){
+    for (glm::vec3& color : im.pixels())
+    {
+        if(!type){
+            color.r = std::pow(color.r, 1.5f);
+            color.g = std::pow(color.g, 1.5f);
+            color.b = std::pow(color.b, 1.5f);
+        }else{
+            color.r = std::pow(color.r, 0.75f);
+            color.g = std::pow(color.g, 0.75f);
+            color.b = std::pow(color.b, 0.75f);
+        }
+    }
+    im.save("output/Star2/Luminosite.png");
+}
+void Disque(){
+    sil::Image im{500/*width*/, 500/*height*/};
+    int r =100;
+    int centre = 250;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            if(((x-centre)*(x-centre)+(y-centre)*(y-centre) <r*r))
+                im.pixel(x, y) = glm::vec3{1.0f};
+            else
+                im.pixel(x, y) = glm::vec3{0.0f};
+        }
+    }
+    im.save("output/disque.png");
+}
+void Cercle(int thickness){
+    sil::Image im{500/*width*/, 500/*height*/};
+    int r =100;
+    int r2 = r-thickness;
+    if (thickness < 0 )
+        r2 = 0;
+    if (thickness > r )
+        r2 = r;
+    int centre = 250;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            if(((x-centre)*(x-centre)+(y-centre)*(y-centre) <r*r) && !((x-centre)*(x-centre)+(y-centre)*(y-centre) <r2*r2))
+                im.pixel(x, y) = glm::vec3{1.0f};
+            else
+                im.pixel(x, y) = glm::vec3{0.0f};
+        }
+    }
+    im.save("output/cercle.png");
 }
 int main()
 {   
     set_random_seed(0);
     sil::Image image{"images/logo.png"};
+    sil::Image image2{"images/photo.jpg"};
     // TODO: modifier l'image
     //image.save("output/pouet.png");
     /* étoile 1
@@ -143,7 +213,12 @@ int main()
         Degrad();
     */
     //Miroir(image);
-    Sound(image);
+    //Sound(image);
+    //Rotation(image);
+    //Dephasage(image);
+    //Luminosite(image2,  true);
+    //Disque();
+    Cercle(1);
 }
 //compil cmake .    puis    cmake --build .
 //exec ./ImageEditor

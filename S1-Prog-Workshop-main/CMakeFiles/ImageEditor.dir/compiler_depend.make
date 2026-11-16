@@ -443,6 +443,7 @@ CMakeFiles/ImageEditor.dir/src/main.cpp.o: src/main.cpp \
   /usr/include/c++/11/istream \
   /usr/include/c++/11/limits \
   /usr/include/c++/11/locale \
+  /usr/include/c++/11/math.h \
   /usr/include/c++/11/new \
   /usr/include/c++/11/ostream \
   /usr/include/c++/11/pstl/pstl_config.h \
@@ -617,6 +618,8 @@ CMakeFiles/ImageEditor.dir/src/main.cpp.o: src/main.cpp \
 /usr/include/c++/11/stdexcept:
 
 /usr/include/c++/11/sstream:
+
+/usr/include/c++/11/math.h:
 
 /usr/include/c++/11/istream:
 

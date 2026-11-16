@@ -445,6 +445,7 @@ CMakeFiles/ImageEditor.dir/src/main.cpp.o
  /usr/include/c++/11/istream
  /usr/include/c++/11/limits
  /usr/include/c++/11/locale
+ /usr/include/c++/11/math.h
  /usr/include/c++/11/new
  /usr/include/c++/11/ostream
  /usr/include/c++/11/pstl/pstl_config.h
