@@ -158,15 +158,13 @@ void Luminosite(sil::Image im, bool type){
     }
     im.save("output/Star2/Luminosite.png");
 }
-void Disque(){
+void Disque(int centreX, int centreY, int r){
     sil::Image im{500/*width*/, 500/*height*/};
-    int r =100;
-    int centre = 250;
     for (int x{0}; x < im.width(); ++x)
     {
         for (int y{0}; y < im.height(); ++y)
         {
-            if(((x-centre)*(x-centre)+(y-centre)*(y-centre) <r*r))
+            if(((x-centreX)*(x-centreX)+(y-centreY)*(y-centreY) <r*r))
                 im.pixel(x, y) = glm::vec3{1.0f};
             else
                 im.pixel(x, y) = glm::vec3{0.0f};
@@ -195,11 +193,147 @@ void Cercle(int thickness){
     }
     im.save("output/cercle.png");
 }
+sil::Image DisqueAnim(int centreX, int centreY, int r){
+    sil::Image im{500/*width*/, 500/*height*/};
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            if(((x-centreX)*(x-centreX)+(y-centreY)*(y-centreY) <r*r))
+                im.pixel(x, y) = glm::vec3{1.0f};
+            else
+                im.pixel(x, y) = glm::vec3{0.0f};
+        }
+    }
+    return im;
+}
+void AnimationDisqueEnter(int centreX, int centreY, int r){
+    if (centreX < 0 || centreY < 0 || r <0)
+        return;
+    for(int i = 0; i < centreX; i+=3){
+        if(i >= 500)
+            return;
+        std::string name("output/anim/animation");
+        name.append(std::to_string(i));
+        name.append(".png");
+        DisqueAnim(i, centreY, r).save(name);
+    }
+}
+void miRosace(sil::Image& im, int x, int y, int testx, int testy, int r, float thick){
+    if((testx*testx + testy*testy <(r+thick/2)*(r+thick/2)) && !(testx*testx + testy*testy < (r-thick/2)*(r-thick/2)))
+                im.pixel(x, y) = glm::vec3{1.0f};
+}
+void Rosace(int r, float thick){
+    sil::Image im{500/*width*/, 500/*height*/};
+    if (thick < 0 )
+        thick = 0;
+    if (thick > r )
+        thick = r;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            im.pixel(x, y) = glm::vec3{0.0f};
+            miRosace(im, x, y, x-250,                 y-250, r, thick);
+            miRosace(im, x, y, x-250+r,     y-250, r, thick);
+            miRosace(im, x, y, x-250-r,    y-250, r, thick);
+            miRosace(im, x, y, x-250+(r/2), y-250+(std::sqrt(3)*r/2), r, thick);
+            miRosace(im, x, y, x-250-(r/2), y-250+(std::sqrt(3)*r/2), r, thick);
+            miRosace(im, x, y, x-250+(r/2), y-250-(std::sqrt(3)*r/2), r, thick);
+            miRosace(im, x, y, x-250-(r/2), y-250-(std::sqrt(3)*r/2), r, thick);
+        }
+    }
+    im.save("output/rosace.png");
+}
+void miRosaceCroissant(sil::Image& im, int x, int y, int testx, int testy, int r, float thick, int direcX, int direcY){
+    if((testx*testx + testy*testy <(r+thick/2)*(r+thick/2)) && !((testx - (thick*direcX))*(testx - (thick*direcX)) + (testy - (thick*direcY))*(testy - (thick*direcY)) < r*r))
+        im.pixel(x, y) = glm::vec3{1.0f};
+}
+void RosaceCroissant(int r, float thick){
+    sil::Image im{500/*width*/, 500/*height*/};
+    if (thick < 0 )
+        thick = 0;
+    if (thick > r )
+        thick = r;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            im.pixel(x, y) = glm::vec3{0.0f};
+            miRosaceCroissant(im, x, y, x-250+r,     y-250, r, thick,                     1,  1);
+            miRosaceCroissant(im, x, y, x-250-r,     y-250, r, thick,                    -1,  1);
+            miRosaceCroissant(im, x, y, x-250+(r/2), y-250-(std::sqrt(3)*r/2), r, thick,  1, -1);
+            miRosaceCroissant(im, x, y, x-250-(r/2), y-250-(std::sqrt(3)*r/2), r, thick, -1, -1);
+            miRosaceCroissant(im, x, y, x-250+(r/2), y-250+(std::sqrt(3)*r/2), r, thick,  1,  1);
+            miRosaceCroissant(im, x, y, x-250-(r/2), y-250+(std::sqrt(3)*r/2), r, thick, -1,  1);
+        }
+    }
+    im.save("output/rosacecroissanr.png");
+}
+void Mosaique(sil::Image& im, int boucle){
+    boucle++;
+    sil::Image Newim{im.width(), im.height()};
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            Newim.pixel(x,y) = im.pixel((x*boucle)%im.width(), (y*boucle)%im.height());
+        }
+    }
+    Newim.save("output/mosaique.png");
+}
+void MosaiqueMirrorBug(sil::Image& im, int boucle){
+    boucle++;
+    int xF;
+    int yF;
+    sil::Image Newim{im.width(), im.height()};
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            if(((x*boucle)/2)%2)
+                xF = im.width() - ((x*boucle)%im.width())-1;
+            else
+                xF = (x*boucle)%im.width();
+            if(((y*boucle)/2)%2)
+                yF = im.height() - ((y*boucle)%im.height())-1;
+            else
+                yF = (y*boucle)%im.height();
+
+            Newim.pixel(x,y) = im.pixel(xF, yF); 
+        }
+    }
+    Newim.save("output/mirromosaiqueBug.png");
+}
+void MosaiqueMirror(sil::Image& im, int boucle){
+    boucle++;
+    int xF;
+    int yF;
+    sil::Image Newim{im.width(), im.height()};
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            if(((x*boucle)/im.width())%2)
+                xF = im.width() - ((x*boucle)%im.width())-1;
+            else
+                xF = (x*boucle)%im.width();
+            if(((y*boucle)/im.height())%2)
+                yF = im.height() - ((y*boucle)%im.height())-1;
+            else
+                yF = (y*boucle)%im.height();
+
+            Newim.pixel(x,y) = im.pixel(xF, yF); 
+        }
+    }
+    Newim.save("output/mirromosaique.png");
+}
 int main()
 {   
     set_random_seed(0);
     sil::Image image{"images/logo.png"};
     sil::Image image2{"images/photo.jpg"};
+    sil::Image image3{"images/AshBaby.jpg"};
     // TODO: modifier l'image
     //image.save("output/pouet.png");
     /* étoile 1
@@ -217,8 +351,13 @@ int main()
     //Rotation(image);
     //Dephasage(image);
     //Luminosite(image2,  true);
-    //Disque();
-    Cercle(1);
+    //Disque(250,250,100);
+    //Cercle(10);
+    //AnimationDisqueEnter(250,250,100);
+    //Rosace(100,10.0f);
+    //RosaceCroissant(100,25.0f);
+    //Mosaique(image, 8);
+    //MosaiqueMirror(image, 8);
 }
 //compil cmake .    puis    cmake --build .
 //exec ./ImageEditor
