@@ -232,7 +232,7 @@ void AnimationDisqueEnter(int centreX, int centreY, int r){
         DisqueAnim(i, centreY, r).save(name);
     }
 }
-void miRosace(sil::Image& im, int x, int y, int testx, int testy, int r, float thick){
+void miRosace(sil::Image& im, int x, int y, int testx, int testy, int r, float thick){//doubt
     if((testx*testx + testy*testy <(r+thick/2)*(r+thick/2)) && !(testx*testx + testy*testy < (r-thick/2)*(r-thick/2)))
                 im.pixel(x, y) = glm::vec3{1.0f};
 }
@@ -283,7 +283,7 @@ void RosaceCroissant(int r, float thick){
     }
     im.save("output/rosacecroissanr.png");
 }
-void Mosaique(sil::Image& im, int boucle){
+void Mosaique(sil::Image& im, int boucle){//doubt
     boucle++;
     sil::Image Newim{im.width(), im.height()};
     for (int x{0}; x < im.width(); ++x)
@@ -295,7 +295,7 @@ void Mosaique(sil::Image& im, int boucle){
     }
     Newim.save("output/mosaique.png");
 }
-void MosaiqueMirrorBug(sil::Image& im, int boucle){
+void MosaiqueMirrorBug(sil::Image& im, int boucle){//doubt
     boucle++;
     int xF;
     int yF;
@@ -318,7 +318,7 @@ void MosaiqueMirrorBug(sil::Image& im, int boucle){
     }
     Newim.save("output/mirromosaiqueBug.png");
 }
-void MosaiqueMirror(sil::Image& im, int boucle){
+void MosaiqueMirror(sil::Image& im, int boucle){//doubt
     boucle++;
     int xF;
     int yF;
@@ -426,12 +426,90 @@ void DegradColor(glm::vec3 col1, glm::vec3 col2){
     }
     im.save("output/DegradColor.png");
 }
+sil::Image tramageBasique(sil::Image im){
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            if ((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 <0.5f)
+                im.pixel(x, y) = glm::vec3{0.0f,0.0f,0.0f};
+            else
+                im.pixel(x, y) = glm::vec3{1.0f,1.0f,1.0f};
+        }
+    }
+    //im.save("output/Tramage/black&white.png");
+    return im;
+}
+sil::Image tramage2(sil::Image im){
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            if (((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 + random_float(-0.4f,0.4f))<0.5f)
+                im.pixel(x, y) = glm::vec3{0.0f,0.0f,0.0f};
+            else
+                im.pixel(x, y) = glm::vec3{1.0f,1.0f,1.0f};
+        }
+    }
+    //im.save("output/Tramage/black&white2.png");
+    return im;
+}
+sil::Image pointillage(sil::Image im, int puissance){
+    float val;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            if (x%2 == 1)
+                val = -0.5f;
+            else 
+                val = -0.3f;
+            if(y%2 == 0){
+                if (x%2 == 1)
+                    val = 0.3f;
+                else 
+                    val = 0.5f;
+            }
+            if (((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 + std::pow(val, puissance))<0.5f)
+                im.pixel(x, y) = glm::vec3{0.0f,0.0f,0.0f};
+            else
+                im.pixel(x, y) = glm::vec3{1.0f,1.0f,1.0f};
+        }
+    }
+    return im;
+}
+sil::Image tramage3(sil::Image im){
+    float val;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            if (x%2 == 1)
+                val = -0.5f;
+            else 
+                val = -0.3f;
+            if(y%2 == 0){
+                if (x%2 == 1)
+                    val = 0.3f;
+                else 
+                    val = 0.5f;
+            }
+            if (((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 + val)<0.5f)
+                im.pixel(x, y) = glm::vec3{0.0f,0.0f,0.0f};
+            else
+                im.pixel(x, y) = glm::vec3{1.0f,1.0f,1.0f};
+        }
+    }
+    return im;
+}
 int main()
 {   
     set_random_seed(0);
     sil::Image image{"images/logo.png"};
     sil::Image image2{"images/photo.jpg"};
     sil::Image image3{"images/AshBaby.jpg"};
+    sil::Image p{"images/pont.png"};
+    sil::Image p2{"images/pont2.png"};
     // TODO: modifier l'image
     //image.save("output/pouet.png");
     /* étoile 1
@@ -467,6 +545,16 @@ int main()
     }*/
    //MosaiqueMirrorBug(image3,1);
    //DegradColor(glm::vec3{1.0f,0.0f,0.0f},glm::vec3{0.0f,1.0f,0.0f});
+
+   //tramageBasique(image2);
+   //tramageBasique(p).save("output/Tramage/pon11.png");
+   //tramageBasique(p2).save("output/Tramage/pont12.png");
+   //tramage2(p).save("output/Tramage/pon21.png");
+   //tramage2(p2).save("output/Tramage/pont22.png");
+   //pointillage(p, 4).save("output/Tramage/quatre1.png");
+   //pointillage(p2, 4).save("output/Tramage/quatre2.png");
+   //tramage3(p).save("output/Tramage/pont31.png");
+   //tramage3(p2).save("output/Tramage/pont32.png");
 }
 //compil cmake .    puis    cmake --build .
 //exec ./ImageEditor
