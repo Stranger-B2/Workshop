@@ -2,6 +2,7 @@
 #include <iostream>
 #include "random.hpp"
 #include <math.h>
+#include <complex>
 
 void Green(sil::Image im){
     for (int x{0}; x < im.width(); ++x)
@@ -93,6 +94,18 @@ void Degrad(){
         }
     }
     im.save("output/Star/Degrad.png");
+}
+void DegradIm(sil::Image im){
+    float val = 1.0f;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        val = 1.0-((im.width()-x)/(im.width()*1.0f));
+        for (int y{0}; y < im.height(); ++y)
+        {
+            im.pixel(x, y) = im.pixel(x, y)+glm::vec3{val,val,val};
+        }
+    }
+    im.save("output/DegradAsh.png");
 }
 void Miroir(sil::Image im){
     for (int x{0}; x < im.width()/2; ++x)
@@ -328,6 +341,91 @@ void MosaiqueMirror(sil::Image& im, int boucle){
     }
     Newim.save("output/mirromosaique.png");
 }
+float nbComplexe(std::complex<float> c){
+    std::complex<float> z = {0.0f,0.0f};
+    int i =0;
+    for (; i< 30; i++){
+        z = z*z +c;
+        if (std::abs(z) > 2)
+            return (i)/30.0f;//i/100.0f;
+    }
+    return 1.0;
+}
+void fractale1(){
+    sil::Image im{500,500};
+    float n;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            n=nbComplexe({(x-250)/250.0f,(y-250)/250.0f});
+            im.pixel(x, y) = glm::vec3{n,n,n};
+        }
+    }
+    im.save("output/fractal.png");
+}
+float nbComplexe2(std::complex<float> c){
+    std::complex<float> z = {1.0f,0.0f};
+    int i =0;
+    for (; i< 30; i++){
+        z = z*z +c;
+        if (std::abs(z) > 2)
+            return (i)/30.0f;//i/100.0f;
+    }
+    return 1.0;
+}
+void fractale2(){
+    sil::Image im{500,500};
+    float n;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            n=nbComplexe2({(x-450)/200.0f,(y-250)/200.0f});
+            im.pixel(x, y) = glm::vec3{n,0.0f,n};
+        }
+    }
+    im.save("output/fractal2.png");
+}
+float nbComplexeP(std::complex<float> c, float v){
+    std::complex<float> z = {0.0f,0.0f};
+    int i =0;
+    for (; i< 30; i++){
+        z = std::pow(z,v) +c;
+        if (std::abs(z) > 2)
+            return (i)/30.0f;//i/100.0f;
+    }
+    return 1.0;
+}
+void fractalepuissance(float v, glm::vec3 col){
+    sil::Image im{500,500};
+    float n;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            n=nbComplexeP({(x-250)/200.0f,(y-250)/200.0f}, v);
+            im.pixel(x, y) = col * n;
+        }
+    }
+    std::string name("output/fractalPuissance/puissance0,0/");
+    name.append(std::to_string(v));
+    name.append(".png");
+    im.save(name);
+}
+void DegradColor(glm::vec3 col1, glm::vec3 col2){
+    sil::Image im{300/*width*/, 200/*height*/};
+    float val = 1.0f;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        val = 1-((300.0f-x)/300.0f);
+        for (int y{0}; y < im.height(); ++y)
+        {
+            im.pixel(x, y) = glm::mix(col1, col2,val);
+        }
+    }
+    im.save("output/DegradColor.png");
+}
 int main()
 {   
     set_random_seed(0);
@@ -346,6 +444,7 @@ int main()
         Negatif(image);
         Degrad();
     */
+    //DegradIm(image3);
     //Miroir(image);
     //Sound(image);
     //Rotation(image);
@@ -358,6 +457,16 @@ int main()
     //RosaceCroissant(100,25.0f);
     //Mosaique(image, 8);
     //MosaiqueMirror(image, 8);
+//    for(int i =0; i < 100; i++){
+//        std::cout<<i<<std::endl;
+//        fractale1();
+//    }
+ //   fractale2();
+    /*for(int i =0; i < 20; i++){
+        fractalepuissance(i, glm::vec3{ random_float(0.0f,1.0f),random_float(0.0f,1.0f),random_float(0.0f,1.0f)});
+    }*/
+   //MosaiqueMirrorBug(image3,1);
+   //DegradColor(glm::vec3{1.0f,0.0f,0.0f},glm::vec3{0.0f,1.0f,0.0f});
 }
 //compil cmake .    puis    cmake --build .
 //exec ./ImageEditor
