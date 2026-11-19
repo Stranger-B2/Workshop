@@ -607,69 +607,130 @@ sil::Image vortex(sil::Image im){
     }
     return newIm;
 }
-
+float outOfBound(float val, float taille){
+    if (val > taille)    
+        return taille;
+    else{
+        if (val < 0.0f)
+            return 0.0f;
+    }
+    return val;
+}
 void triangleDiamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax, bool mirror){
     int tailleX = xmax-xmin;
     int tailleY = ymax-ymin;
     bool direc = tailleX < tailleY; 
     float centre = 0.0f;
-    float temp = random_float(0.0f, (tailleX-1.0f)/2.0f);
+    int xmid = xmin+(xmax-xmin)/2.0f;
+    int ymid = ymin+(ymax-ymin)/2.0f;
+    float temp;
     if (direc){
+        temp = random_float(-0.125f, 0.125f);
         if(mirror){
             centre+=im.pixel(xmax,ymin).g;
             centre+=im.pixel(xmax,ymax).g;
-            centre+=im.pixel(xmin,(ymax-ymin)/2.0f).g;
+            centre+=im.pixel(xmin,ymid).g;
         }else{
             centre+=im.pixel(xmin,ymin).g;
             centre+=im.pixel(xmin,ymax).g;
-            centre+=im.pixel(xmax,(ymax-ymin)/2.0f).g;
+            centre+=im.pixel(xmax,ymid).g;
         }
     }else{
+        temp = random_float(-0.125f, 0.125f);
         if(mirror){
             centre+=im.pixel(xmin,ymin).g;
             centre+=im.pixel(xmax,ymin).g;
-            centre+=im.pixel((xmax-xmin)/2.0f,ymax).g;
+            centre+=im.pixel(xmid,ymax).g;
         }else{
             centre+=im.pixel(xmin,ymax).g;
             centre+=im.pixel(xmax,ymax).g;
-            centre+=im.pixel((xmax-xmin)/2.0f,ymin).g;
+            centre+=im.pixel(xmid,ymin).g;
         }
     }
     centre = centre /3.0f + temp;
+    centre = outOfBound(centre, 1.0f);
     int posX;
     int posY;
     if (direc){
-        if(mirror)
+        posY = ymid;
+        if(mirror){
             posX = xmax;
-        else
+        }else{
             posX = xmin;
+        }
     }else{
-        if(mirror)
+        posX = xmid;
+        if(mirror){
             posY = ymax;//bug posY
-        else
+        }else{
             posY = ymin;
+        }
     }
     std::cout << centre<< " et " << posY <<" min max "<< ymin <<" damn " << ymax << std::endl;
     im.pixel(posX,posY) = glm::vec3{0.0f,centre,0.0f};
     std::cout << centre<< std::endl;
 }
-sil::Image diamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
+void diamond2(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
+    if (xmax-xmin <=1)
+        return;
     int taille = xmax-xmin;
     float val;
     float temp;
     float centre = 0.0f;
+    int xmid = xmin+(xmax-xmin)/2.0f;
+    int ymid = ymin+(ymax-ymin)/2.0f;
     for(int i = 0; i <4; i++){
-        temp = random_float(0.0f, (taille-1.0f)*2.0f);
-        val = temp + random_float(0.0f, (taille-1.0f)/2.0f);
-        im.pixel((i%2 == 0)?xmin:xmax,((i)/2 == 0)?ymin:ymax) = glm::vec3{0.0f,val/*/(taille-1.0f)*/,0.0f};
-        std::cout << val<< std::endl;
+        val = im.pixel((i%2 == 0)?xmin:xmax,((i)/2 == 0)?ymin:ymax).g;
+        std::cout << val/(taille-1.0f)<< std::endl;
         centre+=val;
     }
+    temp = random_float(-0.125f,0.125f);
+    centre = (centre /4.0f)/(2*(taille-1.0f)) + temp;
+    centre = outOfBound(centre, 1.0f);
+
+    im.pixel(xmid,ymid) = glm::vec3{0.0f,centre,0.0f};
+    std::cout << centre<< std::endl;
+    diamond2(im, xmin, ymin, xmid, ymid);
+    diamond2(im, xmid, ymin, xmax, ymid);
+    diamond2(im, xmin, ymid, xmid, ymax);
+    diamond2(im, xmid, ymid, xmax, ymax);
+}
+sil::Image diamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
+    if (xmax-xmin <=1)
+        return im;
+    int taille = xmax-xmin;
+    float val;
+    float temp;
+    //float centre = 0.0f;
+    //int xmid = xmin+(xmax-xmin)/2.0f;
+    //int ymid = ymin+(ymax-ymin)/2.0f;
+    for(int i = 0; i <4; i++){
+        temp = random_float(-0.125f,0.125f);
+        val = (random_float(0.0f, (taille-1.0f)*2.0f))/(2*(taille-1.0f))+temp;
+        val = outOfBound(val, 1.0f);
+
+        im.pixel((i%2 == 0)?xmin:xmax,((i)/2 == 0)?ymin:ymax) = glm::vec3{0.0f,val,0.0f};
+        std::cout << val<< std::endl;
+        //centre+=val;
+    }/*
     temp = random_float(0.0f, (taille-1.0f)/2.0f);
     centre = centre /4.0f + temp;
-    im.pixel((xmax-xmin)/2,(ymax-ymin)/2) = glm::vec3{0.0f,centre/*/(taille-1.0f)*/,0.0f};
-    std::cout << centre<< std::endl;
-    triangleDiamond(im,xmin,ymin,(xmax-xmin)/2.0f,ymax,false);
+    centre = outOfBound(centre, taille-1.0f);
+
+    if (centre > (taille-1.0f))
+        centre = (taille-1.0f);
+    else{
+        if (centre < 0.0f)
+            centre =0.0f;
+    }
+
+    im.pixel(xmid,ymid) = glm::vec3{0.0f,centre/(taille-1.0f),0.0f};
+    std::cout << centre/(taille-1.0f)<< std::endl;
+    diamond2(im, xmin, ymin, xmid, ymid);
+    diamond2(im, xmid, ymin, xmax, ymid);
+    diamond2(im, xmin, ymid, xmid, ymax);
+    diamond2(im, xmid, ymid, xmax, ymax);*/
+    diamond2(im, xmin, ymin, xmax, ymax);
     return im;
 }
 
