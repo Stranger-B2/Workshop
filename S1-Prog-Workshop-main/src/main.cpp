@@ -535,6 +535,27 @@ sil::Image tramage3(sil::Image im){
     }
     return im;
 }
+sil::Image tramageM4(sil::Image im, int puissance){
+    float bayer[4][4] = {
+        {    -0.5,       0,  -0.375,   0.125 },
+        {    0.25,   -0.25,   0.375, - 0.125 },
+        { -0.3125,  0.1875, -0.4375,  0.0625 },
+        {  0.4375, -0.0625,  0.3125, -0.1875 }};
+    float val;
+    
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            val = bayer[x%4][y%4];
+            if (((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 + std::pow(val, puissance))<0.5f)
+                im.pixel(x, y) = glm::vec3{0.0f,0.0f,0.0f};
+            else
+                im.pixel(x, y) = glm::vec3{1.0f,1.0f,1.0f};
+        }
+    }
+    return im;
+}
 //tramage matrice 4
 sil::Image normalisation(sil::Image im){//pourcentage
     float valMax = (im.pixel(0, 0).r+im.pixel(0, 0).g+im.pixel(0, 0).b)/3;
@@ -616,7 +637,7 @@ float outOfBound(float val, float taille){
     }
     return val;
 }
-void triangleDiamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax, bool mirror){
+/*void triangleDiamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax, bool mirror){
     int tailleX = xmax-xmin;
     int tailleY = ymax-ymin;
     bool direc = tailleX < tailleY; 
@@ -672,8 +693,38 @@ void triangleDiamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax, boo
         std::cout << posX << "ho no" << posY<< std::endl;
     else
         im.pixel(posX,posY) = glm::vec3{0.0f,centre,0.0f};
+}*/
+void triangleDiamond(sil::Image& im, int min, int max, bool isX, int axis, float rando){
+    int taille = max-min; 
+    float centre = 0.0f;
+    int mid = min+(max-min)/2.0f;
+    float temp = random_float(-rando, rando);
+    if (isX){
+        centre+=im.pixel(min, axis).g;
+        centre+=im.pixel(max, axis).g;
+    }else{
+        centre+=im.pixel(axis, min).g;
+        centre+=im.pixel(axis, max).g;
+    }
+    centre = centre /2.0f + temp;
+    centre = outOfBound(centre, 1.0f);
+    int posX;
+    int posY;
+    if (isX){
+        posX = mid;
+        posY = axis;
+    }else{
+        posX = axis;
+        posY = mid;
+    }
+//    std::cout << centre<< " et " << posY <<" min max "<< ymin <<" damn " << ymax << std::endl;
+    
+    if(!im.pixel(posX,posY).g !=0.0f)
+        im.pixel(posX,posY) = glm::vec3{0.0f,centre,0.0f};
+    //else
+        //std::cout << posX << "ho no" << posY<< std::endl;
 }
-void diamond2(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
+void diamond2(sil::Image& im, int xmin, int ymin, int xmax, int ymax, float rando){
     if (xmax-xmin <=1)
         return;
     int taille = xmax-xmin;
@@ -687,19 +738,24 @@ void diamond2(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
         //std::cout << val<< std::endl;
         centre+=val;
     }
-    temp = random_float(-0.125f,0.125f);
+    temp = random_float(-rando,rando);
     centre = (centre /4.0f) + temp;
     centre = outOfBound(centre, 1.0f);
     im.pixel(xmid,ymid) = glm::vec3{0.0f,centre,0.0f};
 //    std::cout << centre<< std::endl;
-    triangleDiamond(im,xmin,ymin,xmid,ymax,false);
-    triangleDiamond(im,xmid,ymin,xmax,ymax,true);
-    triangleDiamond(im,xmin,ymin,xmax,ymid,false);
-    triangleDiamond(im,xmin,ymid,xmax,ymax,true);
-    diamond2(im, xmin, ymin, xmid, ymid);
-    diamond2(im, xmid, ymin, xmax, ymid);
-    diamond2(im, xmin, ymid, xmid, ymax);
-    diamond2(im, xmid, ymid, xmax, ymax);
+//    triangleDiamond(im,xmin,ymin,xmid,ymax,false);
+//    triangleDiamond(im,xmid,ymin,xmax,ymax,true);
+//    triangleDiamond(im,xmin,ymin,xmax,ymid,false);
+//    triangleDiamond(im,xmin,ymid,xmax,ymax,true);
+    rando = rando/1.3f;
+    triangleDiamond(im, xmin, xmax, true, ymin, rando);
+    triangleDiamond(im, xmin, xmax, true, ymax, rando);
+    triangleDiamond(im, ymin, ymax, false, xmin, rando);
+    triangleDiamond(im, ymin, ymax, false, xmax, rando);
+    diamond2(im, xmin, ymin, xmid, ymid, rando);
+    diamond2(im, xmid, ymin, xmax, ymid, rando);
+    diamond2(im, xmin, ymid, xmid, ymax, rando);
+    diamond2(im, xmid, ymid, xmax, ymax, rando);
 }
 sil::Image diamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
     if (xmax-xmin <=1)
@@ -718,37 +774,65 @@ sil::Image diamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
         im.pixel((i%2 == 0)?xmin:xmax,((i)/2 == 0)?ymin:ymax) = glm::vec3{0.0f,val,0.0f};
 //        std::cout << val<< std::endl;
         //centre+=val;
-    }/*
-    temp = random_float(0.0f, (taille-1.0f)/2.0f);
-    centre = centre /4.0f + temp;
-    centre = outOfBound(centre, taille-1.0f);
-
-    if (centre > (taille-1.0f))
-        centre = (taille-1.0f);
-    else{
-        if (centre < 0.0f)
-            centre =0.0f;
     }
-
-    im.pixel(xmid,ymid) = glm::vec3{0.0f,centre/(taille-1.0f),0.0f};
-    std::cout << centre/(taille-1.0f)<< std::endl;
-    diamond2(im, xmin, ymin, xmid, ymid);
-    diamond2(im, xmid, ymin, xmax, ymid);
-    diamond2(im, xmin, ymid, xmid, ymax);
-    diamond2(im, xmid, ymid, xmax, ymax);*/
-    diamond2(im, xmin, ymin, xmax, ymax);
+    diamond2(im, xmin, ymin, xmax, ymax, 0.125f/1.3f);
     return im;
 }
 
-/*sil::Image MapColoring(sil::Image im, glm::vec3 col1, glm::vec3 col2){
-    sil::Image newIm{im.width(), im.height()};
-
-
-}*/
+sil::Image MapColoring(sil::Image im, glm::vec3 col1, glm::vec3 col2){
+    float f;
+    for (glm::vec3& color : im.pixels())
+    {
+        if(color.g > 0.25f){
+            if(color.g > 0.3f){
+                if(color.g > 0.35f){
+                    if(color.g > 0.45f){
+                        if(color.g > 0.55f){
+                            if(color.g > 0.65f){
+                                if(color.g > 0.75f){
+                                    if(color.g > 0.8f){
+                                        if(color.g > 0.85f){
+                                            f = 0.80f;
+                                            color = glm::vec3{outOfBound(col2.r-f, 1.0f), outOfBound(col2.g-f, 1.0f), outOfBound(col2.b-f, 1.0f)};
+                                        }else{
+                                            f = 0.60f;
+                                            color = glm::vec3{outOfBound(col2.r-f, 1.0f), outOfBound(col2.g-f, 1.0f), outOfBound(col2.b-f, 1.0f)};
+                                        }
+                                    }else{
+                                        f = 0.35f;
+                                        color = glm::vec3{outOfBound(col2.r-f, 1.0f), outOfBound(col2.g-f, 1.0f), outOfBound(col2.b-f, 1.0f)};
+                                    }
+                                }else{
+                                    f = 0.20f;
+                                    color = glm::vec3{outOfBound(col2.r-f, 1.0f), outOfBound(col2.g-f, 1.0f), outOfBound(col2.b-f, 1.0f)};
+                                }
+                            }else
+                                color = col2;
+                        }else
+                            color = col1;
+                    }else{
+                        f = 0.20f;
+                        color = glm::vec3{outOfBound(col1.r-f, 1.0f), outOfBound(col1.g-f, 1.0f), outOfBound(col1.b-f, 1.0f)};
+                    }
+                }else{
+                    f = 0.35f;
+                    color = glm::vec3{outOfBound(col1.r-f, 1.0f), outOfBound(col1.g-f, 1.0f), outOfBound(col1.b-f, 1.0f)};
+                }
+            }else{
+                f = 0.60f;
+                color = glm::vec3{outOfBound(col1.r-f, 1.0f), outOfBound(col1.g-f, 1.0f), outOfBound(col1.b-f, 1.0f)};
+            }
+        }else{
+            f = 0.80f;
+            color = glm::vec3{outOfBound(col1.r-f, 1.0f), outOfBound(col1.g-f, 1.0f), outOfBound(col1.b-f, 1.0f)};
+        }
+    }
+    return im;
+}
 
 int main()
 {   
-    // set_random_seed(0);
+     //set_random_seed(0);
     sil::Image image{"images/logo.png"};
     sil::Image image2{"images/photo.jpg"};
     sil::Image image22{"images/photo_faible_contraste.jpg"};
@@ -801,11 +885,14 @@ int main()
    //pointillage(p2, 4).save("output/quatre2.png");
    //tramage3(p).save("output/pont31.png");
    //tramage3(p2).save("output/Tramage/pont32.png");
+   tramageM4(p, 1).save("output/pont31.png");
+   tramageM4(p2, 2).save("output/pont32.png");
    //normalisation(image22).save("output/normal.png");;
    //vortex(image).save("output/vortex.png");
-   int sizeD = 512+1;
-   sil::Image diamonIm{sizeD,sizeD};
-   diamond(diamonIm,0,0,sizeD-1,sizeD-1).save("output/diamond.png");
+   //int sizeD = 1024+1;
+   //sil::Image diamonIm{sizeD,sizeD};
+   //diamond(diamonIm,0,0,sizeD-1,sizeD-1).save("output/diamond.png");
+   //MapColoring(diamonIm,glm::vec3{0.0f,0.0f,1.0f},glm::vec3{0.0f,1.0f,0.0f}).save("output/map.png");;
 }
 //compil cmake .    puis    cmake --build .
 //exec ./ImageEditor
