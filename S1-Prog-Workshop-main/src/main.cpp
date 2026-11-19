@@ -432,6 +432,33 @@ void DegradColor(glm::vec3 col1, glm::vec3 col2){
     }
     im.save("output/DegradColor.png");
 }
+glm::vec3 SRGBToLinear(glm::vec3 c ) {
+
+	return ( (c.x+c.y+c.z)/3.0f < 0.04045f ) ? c * 0.0773993808f : glm::vec3 {std::pow( c.x * 0.9478672986f + 0.0521327014f, 2.4f ),std::pow( c.y * 0.9478672986f + 0.0521327014f, 2.4f ),std::pow( c.z * 0.9478672986f + 0.0521327014f, 2.4f )};
+
+}
+
+glm::vec3 LinearToSRGB(glm::vec3 c ) {
+
+	return ( (c.x+c.y+c.z)/3.0f  < 0.0031308f ) ? c * 12.92f : 1.055f * ( glm::vec3 {std::pow( c.x, 0.41666f ),std::pow( c.y, 0.41666f ),std::pow( c.z, 0.41666f )} ) - 0.055f;
+
+}
+void DegradColor2(glm::vec3 col1, glm::vec3 col2){
+    sil::Image im{300/*width*/, 200/*height*/};
+    float val = 1.0f;
+    glm::vec3 col1L = SRGBToLinear(col1);
+    glm::vec3 col2L = SRGBToLinear(col2);
+    for (int x{0}; x < im.width(); ++x)
+    {
+        val = 1-((300.0f-x)/300.0f);
+        for (int y{0}; y < im.height(); ++y)
+        {
+            im.pixel(x, y) = LinearToSRGB(glm::mix(col1L, col2L,val));
+        }
+    }
+    im.save("output/DegradColor2.png");
+}
+
 sil::Image tramageBasique(sil::Image im){
     for (int x{0}; x < im.width(); ++x)
     {
@@ -508,6 +535,7 @@ sil::Image tramage3(sil::Image im){
     }
     return im;
 }
+
 sil::Image normalisation(sil::Image im){//pourcentage
     float valMax = (im.pixel(0, 0).r+im.pixel(0, 0).g+im.pixel(0, 0).b)/3;
     float valMin = (im.pixel(0, 0).r+im.pixel(0, 0).g+im.pixel(0, 0).b)/3 ;
@@ -546,9 +574,108 @@ sil::Image normalisation(sil::Image im){//pourcentage
     }
     return im;
 }
+sil::Image vortexApo(sil::Image im){
+    sil::Image newIm{im.width(), im.height()};
+    float distanceMax = glm::distance(glm::vec2 {0,0},glm::vec2 {im.width()/2, im.height()/2});
+    glm::vec2 position;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            position = rotated(glm::vec2 {x,y},glm::vec2 {im.width()/2, im.height()/2}, (glm::distance(glm::vec2 {x,y}, glm::vec2 {im.width()/2, im.height()/2})*360)/distanceMax);
+            if (position.x >= 0 && position.x < im.width() && position.y >= 0 && position.y < im.height()) 
+                newIm.pixel(position.x, position.y) = im.pixel(x,y);
+        }
+    }
+    return newIm;
+}
+sil::Image vortex(sil::Image im){
+    sil::Image newIm{im.width(), im.height()};
+    float distanceMax = glm::distance(glm::vec2 {0,0},glm::vec2 {im.width()/2, im.height()/2});
+    glm::vec2 position;
+    float rotMax = 20.0;
+    int puis =1;
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            position = rotated(glm::vec2 {x,y},glm::vec2 {im.width()/2, im.height()/2}, std::pow((glm::distance(glm::vec2 {x,y}, glm::vec2 {im.width()/2, im.height()/2})*rotMax),puis)/distanceMax);
+            if (position.x >= 0 && position.x < im.width() && position.y >= 0 && position.y < im.height()){
+                newIm.pixel(x,y) = im.pixel(position.x, position.y);
+            }
+        }
+    }
+    return newIm;
+}
+
+void triangleDiamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax, bool mirror){
+    int tailleX = xmax-xmin;
+    int tailleY = ymax-ymin;
+    bool direc = tailleX < tailleY; 
+    float centre = 0.0f;
+    float temp = random_float(0.0f, (tailleX-1.0f)/2.0f);
+    if (direc){
+        if(mirror){
+            centre+=im.pixel(xmax,ymin).g;
+            centre+=im.pixel(xmax,ymax).g;
+            centre+=im.pixel(xmin,(ymax-ymin)/2.0f).g;
+        }else{
+            centre+=im.pixel(xmin,ymin).g;
+            centre+=im.pixel(xmin,ymax).g;
+            centre+=im.pixel(xmax,(ymax-ymin)/2.0f).g;
+        }
+    }else{
+        if(mirror){
+            centre+=im.pixel(xmin,ymin).g;
+            centre+=im.pixel(xmax,ymin).g;
+            centre+=im.pixel((xmax-xmin)/2.0f,ymax).g;
+        }else{
+            centre+=im.pixel(xmin,ymax).g;
+            centre+=im.pixel(xmax,ymax).g;
+            centre+=im.pixel((xmax-xmin)/2.0f,ymin).g;
+        }
+    }
+    centre = centre /3.0f + temp;
+    int posX;
+    int posY;
+    if (direc){
+        if(mirror)
+            posX = xmax;
+        else
+            posX = xmin;
+    }else{
+        if(mirror)
+            posY = ymax;//bug posY
+        else
+            posY = ymin;
+    }
+    std::cout << centre<< " et " << posY <<" min max "<< ymin <<" damn " << ymax << std::endl;
+    im.pixel(posX,posY) = glm::vec3{0.0f,centre,0.0f};
+    std::cout << centre<< std::endl;
+}
+sil::Image diamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
+    int taille = xmax-xmin;
+    float val;
+    float temp;
+    float centre = 0.0f;
+    for(int i = 0; i <4; i++){
+        temp = random_float(0.0f, (taille-1.0f)*2.0f);
+        val = temp + random_float(0.0f, (taille-1.0f)/2.0f);
+        im.pixel((i%2 == 0)?xmin:xmax,((i)/2 == 0)?ymin:ymax) = glm::vec3{0.0f,val/*/(taille-1.0f)*/,0.0f};
+        std::cout << val<< std::endl;
+        centre+=val;
+    }
+    temp = random_float(0.0f, (taille-1.0f)/2.0f);
+    centre = centre /4.0f + temp;
+    im.pixel((xmax-xmin)/2,(ymax-ymin)/2) = glm::vec3{0.0f,centre/*/(taille-1.0f)*/,0.0f};
+    std::cout << centre<< std::endl;
+    triangleDiamond(im,xmin,ymin,(xmax-xmin)/2.0f,ymax,false);
+    return im;
+}
+
 int main()
 {   
-    set_random_seed(0);
+    // set_random_seed(0);
     sil::Image image{"images/logo.png"};
     sil::Image image2{"images/photo.jpg"};
     sil::Image image22{"images/photo_faible_contraste.jpg"};
@@ -590,6 +717,7 @@ int main()
     }*/
    //MosaiqueMirrorBug(image3,1);
    //DegradColor(glm::vec3{1.0f,0.0f,0.0f},glm::vec3{0.0f,1.0f,0.0f});
+   //DegradColor2(glm::vec3{1.0f,0.0f,0.0f},glm::vec3{0.0f,1.0f,0.0f});
 
    //tramageBasique(image2);
    //tramageBasique(p).save("output/Tramage/pon11.png");
@@ -600,7 +728,11 @@ int main()
    //pointillage(p2, 4).save("output/Tramage/quatre2.png");
    //tramage3(p).save("output/Tramage/pont31.png");
    //tramage3(p2).save("output/Tramage/pont32.png");
-   normalisation(image22).save("output/normal.png");;
+   //normalisation(image22).save("output/normal.png");;
+   //vortex(image).save("output/vortex.png");
+
+   sil::Image diamonIm{17,17};
+   diamond(diamonIm,0,0,16,16).save("output/diamond.png");
 }
 //compil cmake .    puis    cmake --build .
 //exec ./ImageEditor
