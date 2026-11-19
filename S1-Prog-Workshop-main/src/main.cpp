@@ -3,6 +3,12 @@
 #include "random.hpp"
 #include <math.h>
 #include <complex>
+#include <glm/gtx/matrix_transform_2d.hpp>
+
+glm::vec2 rotated(glm::vec2 point, glm::vec2 center_of_rotation, float angle)
+{
+    return glm::vec2{glm::rotate(glm::mat3{1.f}, angle) * glm::vec3{point - center_of_rotation, 0.f}} + center_of_rotation;
+}
 
 void Green(sil::Image im){
     for (int x{0}; x < im.width(); ++x)
@@ -502,11 +508,50 @@ sil::Image tramage3(sil::Image im){
     }
     return im;
 }
+sil::Image normalisation(sil::Image im){//pourcentage
+    float valMax = (im.pixel(0, 0).r+im.pixel(0, 0).g+im.pixel(0, 0).b)/3;
+    float valMin = (im.pixel(0, 0).r+im.pixel(0, 0).g+im.pixel(0, 0).b)/3 ;
+    //glm::vec3 vecMax = im.pixel(0, 0);
+    //glm::vec3 vecMin = im.pixel(0, 0);
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            if((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 > valMax){
+                valMax = (im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3;
+                //vecMax = glm::vec3{im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b};
+            }
+            if((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 < valMin){
+                valMin = (im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3;
+                //vecMin = glm::vec3{im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b};
+            }
+        }
+    }
+    for (int x{0}; x < im.width(); ++x)
+    {
+        for (int y{0}; y < im.height(); ++y)
+        {
+            //if(im.pixel(x, y) == vecMax){
+            /*if((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3  == valMax){
+                im.pixel(x, y) = glm::vec3{1.0f,1.0f,1.0f};
+                std::cout<<"1"<<std::endl;
+            }
+            //if(im.pixel(x, y) == vecMin){
+            if((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3  == valMin){
+                im.pixel(x, y) = glm::vec3{0.0f,0.0f,0.0f};
+                std::cout<<"2"<<std::endl;
+            }*/
+            im.pixel(x, y) = (im.pixel(x, y)-valMin)/(valMax-valMin);
+        }
+    }
+    return im;
+}
 int main()
 {   
     set_random_seed(0);
     sil::Image image{"images/logo.png"};
     sil::Image image2{"images/photo.jpg"};
+    sil::Image image22{"images/photo_faible_contraste.jpg"};
     sil::Image image3{"images/AshBaby.jpg"};
     sil::Image p{"images/pont.png"};
     sil::Image p2{"images/pont2.png"};
@@ -555,6 +600,7 @@ int main()
    //pointillage(p2, 4).save("output/Tramage/quatre2.png");
    //tramage3(p).save("output/Tramage/pont31.png");
    //tramage3(p2).save("output/Tramage/pont32.png");
+   normalisation(image22).save("output/normal.png");;
 }
 //compil cmake .    puis    cmake --build .
 //exec ./ImageEditor
