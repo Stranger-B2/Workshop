@@ -535,7 +535,7 @@ sil::Image tramage3(sil::Image im){
     }
     return im;
 }
-
+//tramage matrice 4
 sil::Image normalisation(sil::Image im){//pourcentage
     float valMax = (im.pixel(0, 0).r+im.pixel(0, 0).g+im.pixel(0, 0).b)/3;
     float valMin = (im.pixel(0, 0).r+im.pixel(0, 0).g+im.pixel(0, 0).b)/3 ;
@@ -666,9 +666,12 @@ void triangleDiamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax, boo
             posY = ymin;
         }
     }
-    std::cout << centre<< " et " << posY <<" min max "<< ymin <<" damn " << ymax << std::endl;
-    im.pixel(posX,posY) = glm::vec3{0.0f,centre,0.0f};
-    std::cout << centre<< std::endl;
+//    std::cout << centre<< " et " << posY <<" min max "<< ymin <<" damn " << ymax << std::endl;
+    
+    if(im.pixel(posX,posY).g !=0.0f)
+        std::cout << posX << "ho no" << posY<< std::endl;
+    else
+        im.pixel(posX,posY) = glm::vec3{0.0f,centre,0.0f};
 }
 void diamond2(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
     if (xmax-xmin <=1)
@@ -681,15 +684,18 @@ void diamond2(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
     int ymid = ymin+(ymax-ymin)/2.0f;
     for(int i = 0; i <4; i++){
         val = im.pixel((i%2 == 0)?xmin:xmax,((i)/2 == 0)?ymin:ymax).g;
-        std::cout << val/(taille-1.0f)<< std::endl;
+        //std::cout << val<< std::endl;
         centre+=val;
     }
     temp = random_float(-0.125f,0.125f);
-    centre = (centre /4.0f)/(2*(taille-1.0f)) + temp;
+    centre = (centre /4.0f) + temp;
     centre = outOfBound(centre, 1.0f);
-
     im.pixel(xmid,ymid) = glm::vec3{0.0f,centre,0.0f};
-    std::cout << centre<< std::endl;
+//    std::cout << centre<< std::endl;
+    triangleDiamond(im,xmin,ymin,xmid,ymax,false);
+    triangleDiamond(im,xmid,ymin,xmax,ymax,true);
+    triangleDiamond(im,xmin,ymin,xmax,ymid,false);
+    triangleDiamond(im,xmin,ymid,xmax,ymax,true);
     diamond2(im, xmin, ymin, xmid, ymid);
     diamond2(im, xmid, ymin, xmax, ymid);
     diamond2(im, xmin, ymid, xmid, ymax);
@@ -710,7 +716,7 @@ sil::Image diamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
         val = outOfBound(val, 1.0f);
 
         im.pixel((i%2 == 0)?xmin:xmax,((i)/2 == 0)?ymin:ymax) = glm::vec3{0.0f,val,0.0f};
-        std::cout << val<< std::endl;
+//        std::cout << val<< std::endl;
         //centre+=val;
     }/*
     temp = random_float(0.0f, (taille-1.0f)/2.0f);
@@ -733,6 +739,12 @@ sil::Image diamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
     diamond2(im, xmin, ymin, xmax, ymax);
     return im;
 }
+
+/*sil::Image MapColoring(sil::Image im, glm::vec3 col1, glm::vec3 col2){
+    sil::Image newIm{im.width(), im.height()};
+
+
+}*/
 
 int main()
 {   
@@ -786,14 +798,14 @@ int main()
    //tramage2(p).save("output/Tramage/pon21.png");
    //tramage2(p2).save("output/Tramage/pont22.png");
    //pointillage(p, 4).save("output/Tramage/quatre1.png");
-   //pointillage(p2, 4).save("output/Tramage/quatre2.png");
-   //tramage3(p).save("output/Tramage/pont31.png");
+   //pointillage(p2, 4).save("output/quatre2.png");
+   //tramage3(p).save("output/pont31.png");
    //tramage3(p2).save("output/Tramage/pont32.png");
    //normalisation(image22).save("output/normal.png");;
    //vortex(image).save("output/vortex.png");
-
-   sil::Image diamonIm{17,17};
-   diamond(diamonIm,0,0,16,16).save("output/diamond.png");
+   int sizeD = 512+1;
+   sil::Image diamonIm{sizeD,sizeD};
+   diamond(diamonIm,0,0,sizeD-1,sizeD-1).save("output/diamond.png");
 }
 //compil cmake .    puis    cmake --build .
 //exec ./ImageEditor
