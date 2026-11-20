@@ -10,7 +10,7 @@ glm::vec2 rotated(glm::vec2 point, glm::vec2 center_of_rotation, float angle)
     return glm::vec2{glm::rotate(glm::mat3{1.f}, angle) * glm::vec3{point - center_of_rotation, 0.f}} + center_of_rotation;
 }
 
-void Green(sil::Image im){
+sil::Image Green(sil::Image im){
     for (int x{0}; x < im.width(); ++x)
     {
         for (int y{0}; y < im.height(); ++y)
@@ -19,7 +19,7 @@ void Green(sil::Image im){
             im.pixel(x, y).b = 0.f;
         }
     }
-    im.save("output/Star/green.png");
+    return im;
 }
 float InnnerSwitch(sil::Image& im, char chan2, int x, int y, float entry){
     float sorti;
@@ -42,7 +42,7 @@ float InnnerSwitch(sil::Image& im, char chan2, int x, int y, float entry){
     }
     return sorti;
 }
-void SwichChannel(sil::Image im, std::string chan1, std::string chan2){
+sil::Image SwichChannel(sil::Image im, std::string chan1, std::string chan2, std::string place){
     for (int x{0}; x < im.width(); ++x)
     {
         for (int y{0}; y < im.height(); ++y)
@@ -59,17 +59,20 @@ void SwichChannel(sil::Image im, std::string chan1, std::string chan2){
                     break;
                 default:
                     std::cout<< "chan1" << std::endl;
-                    return;
+                    return im;
             }
         }
     }
-    std::string name("output/Star/switch");
-    name.append(chan1);
-    name.append(chan2);
-    name.append(".png");
-    im.save(name);
+    if (place.size() !=0){
+        std::string name(place);
+        name.append(chan1);
+        name.append(chan2);
+        name.append(".png");
+        im.save(name);
+    }
+    return im;
 }
-void BlackWhite(sil::Image im){
+sil::Image BlackWhite(sil::Image im){
     for (glm::vec3& color : im.pixels())
     {
         float c =(color.r+color.g+color.b)/3;
@@ -77,18 +80,18 @@ void BlackWhite(sil::Image im){
         color.g = c;
         color.b = c;
     }
-    im.save("output/Star/black&white.png");
+    return im;
 }
-void Negatif(sil::Image im){
+sil::Image Negatif(sil::Image im){
     for (glm::vec3& color : im.pixels())
     {
         color.r = 1-color.r;
         color.g = 1-color.g;
         color.b = 1-color.b;
     }
-    im.save("output/Star/Negatif.png");
+    return im;
 }
-void Degrad(){
+sil::Image Degrad(){
     sil::Image im{300/*width*/, 200/*height*/};
     float val = 1.0f;
     for (int x{0}; x < im.width(); ++x)
@@ -99,9 +102,9 @@ void Degrad(){
             im.pixel(x, y) = glm::vec3{val,val,val};
         }
     }
-    im.save("output/Star/Degrad.png");
+    return im;
 }
-void DegradIm(sil::Image im){
+sil::Image DegradIm(sil::Image im){
     float val = 1.0f;
     for (int x{0}; x < im.width(); ++x)
     {
@@ -111,9 +114,9 @@ void DegradIm(sil::Image im){
             im.pixel(x, y) = im.pixel(x, y)+glm::vec3{val,val,val};
         }
     }
-    im.save("output/DegradAsh.png");
+    return im;
 }
-void Miroir(sil::Image im){
+sil::Image Miroir(sil::Image im){
     for (int x{0}; x < im.width()/2; ++x)
     {
         for (int y{0}; y < im.height(); ++y)
@@ -121,9 +124,9 @@ void Miroir(sil::Image im){
             std::swap( im.pixel(x, y),  im.pixel(im.width()-x-1, y));
         }
     }
-    im.save("output/Star2/Miroir.png");
+    return im;
 }
-void Sound(sil::Image im){
+sil::Image Sound(sil::Image im){
     float x;
     float y;
     for (int i = 0; i <(im.width()*im.height()*2/3); i++){
@@ -134,20 +137,23 @@ void Sound(sil::Image im){
         im.pixel(x,y).b = random_float(0, 1);
 
     }
-    im.save("output/Star2/Sound.png");
+    return im;
 }
-void Rotation(sil::Image im){
+sil::Image Rotation(sil::Image im, bool right){
     sil::Image NewIm{im.height(), im.width()};
     for (int x{0}; x < im.width(); ++x)
     {
         for (int y{0}; y < im.height(); ++y)
         {
-            NewIm.pixel(y,x) = im.pixel(x,y);
+            if(right)
+                NewIm.pixel(im.height() -y -1, x) = im.pixel(x,y);
+            else
+                NewIm.pixel(y,im.width() - x - 1) = im.pixel(x,y);
         }
     }
-    NewIm.save("output/Star2/rotation.png");
+    return NewIm;
 }
-void Dephasage(sil::Image im){
+sil::Image Dephasage(sil::Image im){
     sil::Image NewIm{im.height(), im.width()};
     NewIm = im;
     int decal = im.width()/10;
@@ -160,9 +166,9 @@ void Dephasage(sil::Image im){
             //NewIm.pixel(x,y).g = (im.pixel(x,y).g*2 > 1.0f)?im.pixel(x,y).g*2:1.0f;
         }
     }
-    NewIm.save("output/Star2/dephaser.png");
+    return(NewIm);
 }
-void Luminosite(sil::Image im, bool type){
+sil::Image Luminosite(sil::Image im, bool type){
     for (glm::vec3& color : im.pixels())
     {
         if(!type){
@@ -175,9 +181,9 @@ void Luminosite(sil::Image im, bool type){
             color.b = std::pow(color.b, 0.75f);
         }
     }
-    im.save("output/Star2/Luminosite.png");
+    return im;
 }
-void Disque(int centreX, int centreY, int r){
+sil::Image Disque(int centreX, int centreY, int r){
     sil::Image im{500/*width*/, 500/*height*/};
     for (int x{0}; x < im.width(); ++x)
     {
@@ -189,29 +195,34 @@ void Disque(int centreX, int centreY, int r){
                 im.pixel(x, y) = glm::vec3{0.0f};
         }
     }
-    im.save("output/disque.png");
+    return im;
 }
-void Cercle(int thickness){
+sil::Image Cercle(int centreX, int centreY, int r, int thickness){
     sil::Image im{500/*width*/, 500/*height*/};
-    int r =100;
-    int r2 = r-thickness;
-    if (thickness < 0 )
-        r2 = 0;
-    if (thickness > r )
+    int r2 = r-(thickness/2)-(thickness%2);
+    if (thickness < 0 ){
         r2 = r;
-    int centre = 250;
+        thickness =0;
+    }
+    if (thickness > r ){
+        r2 = 0;
+        thickness = 0;
+    }
+    r = r + thickness/2;
+    std::cout << r << " " << r2 << std::endl;
     for (int x{0}; x < im.width(); ++x)
     {
         for (int y{0}; y < im.height(); ++y)
         {
-            if(((x-centre)*(x-centre)+(y-centre)*(y-centre) <r*r) && !((x-centre)*(x-centre)+(y-centre)*(y-centre) <r2*r2))
+            if(((x-centreX)*(x-centreX)+(y-centreY)*(y-centreY) <r*r) && !((x-centreX)*(x-centreX)+(y-centreY)*(y-centreY) <r2*r2))
                 im.pixel(x, y) = glm::vec3{1.0f};
             else
                 im.pixel(x, y) = glm::vec3{0.0f};
         }
     }
-    im.save("output/cercle.png");
+    return im;
 }
+///---here
 sil::Image DisqueAnim(int centreX, int centreY, int r){
     sil::Image im{500/*width*/, 500/*height*/};
     for (int x{0}; x < im.width(); ++x)
@@ -470,15 +481,14 @@ sil::Image tramageBasique(sil::Image im){
                 im.pixel(x, y) = glm::vec3{1.0f,1.0f,1.0f};
         }
     }
-    //im.save("output/Tramage/black&white.png");
     return im;
 }
-sil::Image tramage2(sil::Image im){
+sil::Image tramage2(sil::Image im, float alea){
     for (int x{0}; x < im.width(); ++x)
     {
         for (int y{0}; y < im.height(); ++y)
         {
-            if (((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 + random_float(-0.4f,0.4f))<0.5f)
+            if (((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 + random_float(-alea,alea))<0.5f)
                 im.pixel(x, y) = glm::vec3{0.0f,0.0f,0.0f};
             else
                 im.pixel(x, y) = glm::vec3{1.0f,1.0f,1.0f};
@@ -487,47 +497,23 @@ sil::Image tramage2(sil::Image im){
     //im.save("output/Tramage/black&white2.png");
     return im;
 }
-sil::Image pointillage(sil::Image im, int puissance){
+sil::Image pointillage(sil::Image im, float puissance){
     float val;
     for (int x{0}; x < im.width(); ++x)
     {
         for (int y{0}; y < im.height(); ++y)
         {
             if (x%2 == 1)
-                val = -0.5f;
+                val = -std::pow(0.5f, puissance);
             else 
-                val = -0.3f;
+                val = -std::pow(0.3f, puissance);
             if(y%2 == 0){
                 if (x%2 == 1)
-                    val = 0.3f;
+                    val = std::pow(0.3f, puissance);
                 else 
-                    val = 0.5f;
+                    val = std::pow(0.5f, puissance);
             }
-            if (((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 + std::pow(val, puissance))<0.5f)
-                im.pixel(x, y) = glm::vec3{0.0f,0.0f,0.0f};
-            else
-                im.pixel(x, y) = glm::vec3{1.0f,1.0f,1.0f};
-        }
-    }
-    return im;
-}
-sil::Image tramage3(sil::Image im){
-    float val;
-    for (int x{0}; x < im.width(); ++x)
-    {
-        for (int y{0}; y < im.height(); ++y)
-        {
-            if (x%2 == 1)
-                val = -0.5f;
-            else 
-                val = -0.3f;
-            if(y%2 == 0){
-                if (x%2 == 1)
-                    val = 0.3f;
-                else 
-                    val = 0.5f;
-            }
-            if (((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 + val)<0.5f)
+            if ((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 + val<0.5f)
                 im.pixel(x, y) = glm::vec3{0.0f,0.0f,0.0f};
             else
                 im.pixel(x, y) = glm::vec3{1.0f,1.0f,1.0f};
@@ -548,7 +534,11 @@ sil::Image tramageM4(sil::Image im, int puissance){
         for (int y{0}; y < im.height(); ++y)
         {
             val = bayer[x%4][y%4];
-            if (((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 + std::pow(val, puissance))<0.5f)
+            if (val < 0)
+                val = -std::pow(val, std::abs(puissance));
+            else
+                val = std::pow(val, puissance);
+            if (((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 + val)<0.5f)
                 im.pixel(x, y) = glm::vec3{0.0f,0.0f,0.0f};
             else
                 im.pixel(x, y) = glm::vec3{1.0f,1.0f,1.0f};
@@ -556,7 +546,7 @@ sil::Image tramageM4(sil::Image im, int puissance){
     }
     return im;
 }
-//tramage matrice 4
+
 sil::Image normalisation(sil::Image im){//pourcentage
     float valMax = (im.pixel(0, 0).r+im.pixel(0, 0).g+im.pixel(0, 0).b)/3;
     float valMin = (im.pixel(0, 0).r+im.pixel(0, 0).g+im.pixel(0, 0).b)/3 ;
@@ -724,6 +714,7 @@ void triangleDiamond(sil::Image& im, int min, int max, bool isX, int axis, float
     //else
         //std::cout << posX << "ho no" << posY<< std::endl;
 }
+#define FACTEUR 1.5f
 void diamond2(sil::Image& im, int xmin, int ymin, int xmax, int ymax, float rando){
     if (xmax-xmin <=1)
         return;
@@ -747,7 +738,7 @@ void diamond2(sil::Image& im, int xmin, int ymin, int xmax, int ymax, float rand
 //    triangleDiamond(im,xmid,ymin,xmax,ymax,true);
 //    triangleDiamond(im,xmin,ymin,xmax,ymid,false);
 //    triangleDiamond(im,xmin,ymid,xmax,ymax,true);
-    rando = rando/1.3f;
+    rando = rando/FACTEUR;
     triangleDiamond(im, xmin, xmax, true, ymin, rando);
     triangleDiamond(im, xmin, xmax, true, ymax, rando);
     triangleDiamond(im, ymin, ymax, false, xmin, rando);
@@ -767,7 +758,7 @@ sil::Image diamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
     //int xmid = xmin+(xmax-xmin)/2.0f;
     //int ymid = ymin+(ymax-ymin)/2.0f;
     for(int i = 0; i <4; i++){
-        temp = random_float(-0.125f,0.125f);
+        temp = random_float(-0.5f,0.5f);
         val = (random_float(0.0f, (taille-1.0f)*2.0f))/(2*(taille-1.0f))+temp;
         val = outOfBound(val, 1.0f);
 
@@ -775,8 +766,8 @@ sil::Image diamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
 //        std::cout << val<< std::endl;
         //centre+=val;
     }
-    diamond2(im, xmin, ymin, xmax, ymax, 0.125f/1.3f);
-    return im;
+    diamond2(im, xmin, ymin, xmax, ymax, 0.5f/FACTEUR);
+    return im;//normalisation(im);
 }
 
 sil::Image MapColoring(sil::Image im, glm::vec3 col1, glm::vec3 col2){
@@ -832,7 +823,8 @@ sil::Image MapColoring(sil::Image im, glm::vec3 col1, glm::vec3 col2){
 
 int main()
 {   
-     //set_random_seed(0);
+    //set_random_seed(0);
+    sil::Image test{"images/caniche.jpg"};
     sil::Image image{"images/logo.png"};
     sil::Image image2{"images/photo.jpg"};
     sil::Image image22{"images/photo_faible_contraste.jpg"};
@@ -885,14 +877,33 @@ int main()
    //pointillage(p2, 4).save("output/quatre2.png");
    //tramage3(p).save("output/pont31.png");
    //tramage3(p2).save("output/Tramage/pont32.png");
-   tramageM4(p, 1).save("output/pont31.png");
-   tramageM4(p2, 2).save("output/pont32.png");
+   //tramageM4(p, 1).save("output/pont31.png");
+   //tramageM4(p2, 2).save("output/pont32.png");
    //normalisation(image22).save("output/normal.png");;
    //vortex(image).save("output/vortex.png");
-   //int sizeD = 1024+1;
+   //int sizeD = 512+1;
    //sil::Image diamonIm{sizeD,sizeD};
    //diamond(diamonIm,0,0,sizeD-1,sizeD-1).save("output/diamond.png");
-   //MapColoring(diamonIm,glm::vec3{0.0f,0.0f,1.0f},glm::vec3{0.0f,1.0f,0.0f}).save("output/map.png");;
+   //MapColoring(diamonIm,glm::vec3{0.0f,0.0f,1.0f},glm::vec3{0.0f,1.0f,0.0f}).save("output/map.png");
+
+   //Green(test).save("output/test.png");
+   //SwichChannel(test,"r","b","output/switch");SwichChannel(test,"g","r","output/switch");SwichChannel(test,"b","g","output/switch");SwichChannel(test,"r","r","output/switch");
+   //BlackWhite(test).save("output/test.png");
+   //Negatif(test).save("output/test.png");
+    //Degrad().save("output/test.png");
+    //DegradIm(test).save("output/test.png");
+    //Miroir(test).save("output/test.png");
+    //Sound(test).save("output/test.png");
+    //Rotation(test, true).save("output/test.png");
+    //Dephasage(test).save("output/test.png");
+    //Luminosite(test, false).save("output/test.png");    Luminosite(test, true).save("output/test2.png");
+    //Disque(250,250,100).save("output/test.png");   Disque(100,250,50).save("output/test2.png");Disque(250,100,300).save("output/test3.png");
+    //Cercle(250,250,100,25).save("output/test.png");   Cercle(100,250,50,1).save("output/test2.png");Cercle(250,100,50,300).save("output/test3.png");Cercle(250,100,50,-10).save("output/test4.png");
+    //tramageBasique(test).save("output/test.png");
+    //tramage2(test, 1.0f).save("output/tramagePart2alea10.png");
+    //pointillage(test, 1.5f).save("output/test.png");
+    //tramageM4(test, 1.0f).save("output/test.png");
+    std::cout << std::pow(0.6, 1.0f) << std::endl;
 }
 //compil cmake .    puis    cmake --build .
 //exec ./ImageEditor
