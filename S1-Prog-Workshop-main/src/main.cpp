@@ -116,6 +116,7 @@ sil::Image DegradIm(sil::Image im){
     }
     return im;
 }
+
 sil::Image Miroir(sil::Image im){
     for (int x{0}; x < im.width()/2; ++x)
     {
@@ -183,6 +184,7 @@ sil::Image Luminosite(sil::Image im, bool type){
     }
     return im;
 }
+
 sil::Image Disque(int centreX, int centreY, int r){
     sil::Image im{500/*width*/, 500/*height*/};
     for (int x{0}; x < im.width(); ++x)
@@ -301,6 +303,7 @@ sil::Image RosaceCroissant(int r, float thick){
     }
     return im;
 }
+
 sil::Image Mosaique(sil::Image im, int boucle){
     if(boucle < 1)
         return im;
@@ -362,6 +365,7 @@ sil::Image MosaiqueMirror(sil::Image im, int boucle){
     }
     return Newim;
 }
+
 float nbComplexe(std::complex<float> c, int boucle){
     std::complex<float> z = {0.0f,0.0f};
     int i =0;
@@ -440,6 +444,7 @@ sil::Image fractalepuissance(float v){
     }
     return im;
 }
+
 sil::Image DegradColor(glm::vec3 col1, glm::vec3 col2){
     sil::Image im{300/*width*/, 200/*height*/};
     float val = 1.0f;
@@ -627,6 +632,7 @@ sil::Image vortex(sil::Image im){
     }
     return newIm;
 }
+
 float outOfBound(float val, float taille){
     if (val > taille)    
         return taille;
@@ -805,29 +811,10 @@ int main()
     sil::Image p{"images/pont.png"};
     sil::Image p2{"images/pont2.png"};
 
-   //tramageBasique(image2);
-   //tramageBasique(p).save("output/Tramage/pon11.png");
-   //tramageBasique(p2).save("output/Tramage/pont12.png");
-   //tramage2(p).save("output/Tramage/pon21.png");
-   //tramage2(p2).save("output/Tramage/pont22.png");
-   //pointillage(p, 4).save("output/Tramage/quatre1.png");
-   //pointillage(p2, 4).save("output/quatre2.png");
-   //tramage3(p).save("output/pont31.png");
-   //tramage3(p2).save("output/Tramage/pont32.png");
-   //tramageM4(p, 1).save("output/pont31.png");
-   //tramageM4(p2, 2).save("output/pont32.png");
-   //normalisation(image22).save("output/normal.png");;
-   //vortex(image).save("output/vortex.png");
-   int sizeD = 512+1;
-   sil::Image diamonIm{sizeD,sizeD};
-   diamond(diamonIm,0,0,sizeD-1,sizeD-1).save("output/diamond.png");
-   sil::Image map = MapColoring(diamonIm,glm::vec3{0.0f,0.0f,1.0f},glm::vec3{0.0f,1.0f,0.0f});
-   map.save("output/map.png");
-
-   //Green(test).save("output/test.png");
-   //SwichChannel(test,"r","b","output/switch");SwichChannel(test,"g","r","output/switch");SwichChannel(test,"b","g","output/switch");SwichChannel(test,"r","r","output/switch");
-   //BlackWhite(test).save("output/test.png");
-   //Negatif(test).save("output/test.png");
+    //Green(test).save("output/test.png");
+    //SwichChannel(test,"r","b","output/switch");SwichChannel(test,"g","r","output/switch");SwichChannel(test,"b","g","output/switch");SwichChannel(test,"r","r","output/switch");
+    //BlackWhite(test).save("output/test.png");
+    //Negatif(test).save("output/test.png");
     //Degrad().save("output/test.png");
     //DegradIm(test).save("output/test.png");
     //Miroir(test).save("output/test.png");
@@ -846,9 +833,9 @@ int main()
     //fractale2(3).save("output/test.png");
     //fractale1(3).save("output/test.png");
     //fractalepuissance(3.0f).save("output/test.png");
-   // DegradColor(glm::vec3{1.0f,0.0f,0.0f},glm::vec3{0.0f,1.0f,0.0f}).save("output/test.png");
+    //DegradColor(glm::vec3{1.0f,0.0f,0.0f},glm::vec3{0.0f,1.0f,0.0f}).save("output/test.png");
     //DegradColor2(glm::vec3{1.0f,0.0f,0.0f},glm::vec3{0.0f,1.0f,0.0f}).save("output/test.png");
-  //  normalisation(test).save("output/test.png");
+    //normalisation(test).save("output/test.png");
 
 
     //tramageBasique(test).save("output/test.png");
@@ -856,9 +843,7 @@ int main()
     //pointillage(test, 1.5f).save("output/test.png");
     //tramageM4(test, 5.0f).save("output/test.png");
     //std::cout << std::pow(0.6,1.5f) << std::endl;
-    //  tramage2(image3,.0).save("output/test.png");
+    //tramage2(image3,.0).save("output/test.png");
 }
 //compil cmake .    puis    cmake --build .
 //exec ./ImageEditor
-
-//dificulté une l'oublie que se sont des copies et non l'original pour les fonctions auxiliaire
