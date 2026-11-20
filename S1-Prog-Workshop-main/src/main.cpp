@@ -222,7 +222,6 @@ sil::Image Cercle(int centreX, int centreY, int r, int thickness){
     }
     return im;
 }
-///---here
 sil::Image DisqueAnim(int centreX, int centreY, int r){
     sil::Image im{500/*width*/, 500/*height*/};
     for (int x{0}; x < im.width(); ++x)
@@ -253,7 +252,7 @@ void miRosace(sil::Image& im, int x, int y, int testx, int testy, int r, float t
     if((testx*testx + testy*testy <(r+thick/2)*(r+thick/2)) && !(testx*testx + testy*testy < (r-thick/2)*(r-thick/2)))
                 im.pixel(x, y) = glm::vec3{1.0f};
 }
-void Rosace(int r, float thick){
+sil::Image Rosace(int r, float thick){
     sil::Image im{500/*width*/, 500/*height*/};
     if (thick < 0 )
         thick = 0;
@@ -273,13 +272,13 @@ void Rosace(int r, float thick){
             miRosace(im, x, y, x-250-(r/2), y-250-(std::sqrt(3)*r/2), r, thick);
         }
     }
-    im.save("output/rosace.png");
+    return im;
 }
 void miRosaceCroissant(sil::Image& im, int x, int y, int testx, int testy, int r, float thick, int direcX, int direcY){
     if((testx*testx + testy*testy <(r+thick/2)*(r+thick/2)) && !((testx - (thick*direcX))*(testx - (thick*direcX)) + (testy - (thick*direcY))*(testy - (thick*direcY)) < r*r))
         im.pixel(x, y) = glm::vec3{1.0f};
 }
-void RosaceCroissant(int r, float thick){
+sil::Image RosaceCroissant(int r, float thick){
     sil::Image im{500/*width*/, 500/*height*/};
     if (thick < 0 )
         thick = 0;
@@ -298,10 +297,11 @@ void RosaceCroissant(int r, float thick){
             miRosaceCroissant(im, x, y, x-250-(r/2), y-250+(std::sqrt(3)*r/2), r, thick, -1,  1);
         }
     }
-    im.save("output/rosacecroissanr.png");
+    return im;
 }
-void Mosaique(sil::Image& im, int boucle){//doubt
-    boucle++;
+sil::Image Mosaique(sil::Image im, int boucle){
+    if(boucle < 1)
+        return im;
     sil::Image Newim{im.width(), im.height()};
     for (int x{0}; x < im.width(); ++x)
     {
@@ -310,10 +310,11 @@ void Mosaique(sil::Image& im, int boucle){//doubt
             Newim.pixel(x,y) = im.pixel((x*boucle)%im.width(), (y*boucle)%im.height());
         }
     }
-    Newim.save("output/mosaique.png");
+    return Newim;
 }
-void MosaiqueMirrorBug(sil::Image& im, int boucle){//doubt
-    boucle++;
+sil::Image MosaiqueMirrorBug(sil::Image im, int boucle){//doubt
+    if(boucle < 1)
+        return im;
     int xF;
     int yF;
     sil::Image Newim{im.width(), im.height()};
@@ -333,10 +334,11 @@ void MosaiqueMirrorBug(sil::Image& im, int boucle){//doubt
             Newim.pixel(x,y) = im.pixel(xF, yF); 
         }
     }
-    Newim.save("output/mirromosaiqueBug.png");
+    return Newim;
 }
-void MosaiqueMirror(sil::Image& im, int boucle){//doubt
-    boucle++;
+sil::Image MosaiqueMirror(sil::Image im, int boucle){
+    if(boucle < 1)
+        return im;
     int xF;
     int yF;
     sil::Image Newim{im.width(), im.height()};
@@ -356,53 +358,61 @@ void MosaiqueMirror(sil::Image& im, int boucle){//doubt
             Newim.pixel(x,y) = im.pixel(xF, yF); 
         }
     }
-    Newim.save("output/mirromosaique.png");
+    return Newim;
 }
-float nbComplexe(std::complex<float> c){
+float nbComplexe(std::complex<float> c, int boucle){
     std::complex<float> z = {0.0f,0.0f};
     int i =0;
+    std::complex<float> temp;
     for (; i< 30; i++){
-        z = z*z +c;
+        temp = z;
+        for(int i = 0; i < boucle; i++)
+            z = z*temp;
+        z +=c;
         if (std::abs(z) > 2)
             return (i)/30.0f;//i/100.0f;
     }
     return 1.0;
 }
-void fractale1(){
+sil::Image fractale1(int boucle){
     sil::Image im{500,500};
     float n;
     for (int x{0}; x < im.width(); ++x)
     {
         for (int y{0}; y < im.height(); ++y)
         {
-            n=nbComplexe({(x-250)/250.0f,(y-250)/250.0f});
+            n=nbComplexe({(x-250)/250.0f,(y-250)/250.0f}, boucle);
             im.pixel(x, y) = glm::vec3{n,n,n};
         }
     }
-    im.save("output/fractal.png");
+    return im;
 }
-float nbComplexe2(std::complex<float> c){
+float nbComplexe2(std::complex<float> c, int boucle){
     std::complex<float> z = {1.0f,0.0f};
     int i =0;
+    std::complex<float> temp;
     for (; i< 30; i++){
-        z = z*z +c;
+        temp = z;
+        for(int i = 0; i < boucle; i++)
+            z = z*temp;
+        z +=c;
         if (std::abs(z) > 2)
             return (i)/30.0f;//i/100.0f;
     }
     return 1.0;
 }
-void fractale2(){
+sil::Image fractale2(int boucle){
     sil::Image im{500,500};
     float n;
     for (int x{0}; x < im.width(); ++x)
     {
         for (int y{0}; y < im.height(); ++y)
         {
-            n=nbComplexe2({(x-450)/200.0f,(y-250)/200.0f});
+            n=nbComplexe2({(x-450)/200.0f,(y-250)/200.0f}, boucle);
             im.pixel(x, y) = glm::vec3{n,0.0f,n};
         }
     }
-    im.save("output/fractal2.png");
+    return im;
 }
 float nbComplexeP(std::complex<float> c, float v){
     std::complex<float> z = {0.0f,0.0f};
@@ -414,8 +424,9 @@ float nbComplexeP(std::complex<float> c, float v){
     }
     return 1.0;
 }
-void fractalepuissance(float v, glm::vec3 col){
+sil::Image fractalepuissance(float v){
     sil::Image im{500,500};
+    glm::vec3 col = glm::vec3{ random_float(0.0f,1.0f),random_float(0.0f,1.0f),random_float(0.0f,1.0f)};
     float n;
     for (int x{0}; x < im.width(); ++x)
     {
@@ -425,12 +436,9 @@ void fractalepuissance(float v, glm::vec3 col){
             im.pixel(x, y) = col * n;
         }
     }
-    std::string name("output/fractalPuissance/puissance0,0/");
-    name.append(std::to_string(v));
-    name.append(".png");
-    im.save(name);
+    return im;
 }
-void DegradColor(glm::vec3 col1, glm::vec3 col2){
+sil::Image DegradColor(glm::vec3 col1, glm::vec3 col2){
     sil::Image im{300/*width*/, 200/*height*/};
     float val = 1.0f;
     for (int x{0}; x < im.width(); ++x)
@@ -441,20 +449,19 @@ void DegradColor(glm::vec3 col1, glm::vec3 col2){
             im.pixel(x, y) = glm::mix(col1, col2,val);
         }
     }
-    im.save("output/DegradColor.png");
+    return im;
 }
 glm::vec3 SRGBToLinear(glm::vec3 c ) {
 
 	return ( (c.x+c.y+c.z)/3.0f < 0.04045f ) ? c * 0.0773993808f : glm::vec3 {std::pow( c.x * 0.9478672986f + 0.0521327014f, 2.4f ),std::pow( c.y * 0.9478672986f + 0.0521327014f, 2.4f ),std::pow( c.z * 0.9478672986f + 0.0521327014f, 2.4f )};
 
 }
-
 glm::vec3 LinearToSRGB(glm::vec3 c ) {
 
 	return ( (c.x+c.y+c.z)/3.0f  < 0.0031308f ) ? c * 12.92f : 1.055f * ( glm::vec3 {std::pow( c.x, 0.41666f ),std::pow( c.y, 0.41666f ),std::pow( c.z, 0.41666f )} ) - 0.055f;
 
 }
-void DegradColor2(glm::vec3 col1, glm::vec3 col2){
+sil::Image DegradColor2(glm::vec3 col1, glm::vec3 col2){
     sil::Image im{300/*width*/, 200/*height*/};
     float val = 1.0f;
     glm::vec3 col1L = SRGBToLinear(col1);
@@ -467,7 +474,7 @@ void DegradColor2(glm::vec3 col1, glm::vec3 col2){
             im.pixel(x, y) = LinearToSRGB(glm::mix(col1L, col2L,val));
         }
     }
-    im.save("output/DegradColor2.png");
+    return im;
 }
 
 sil::Image tramageBasique(sil::Image im){
@@ -535,7 +542,7 @@ sil::Image tramageM4(sil::Image im, int puissance){
         {
             val = bayer[x%4][y%4];
             if (val < 0)
-                val = -std::pow(val, std::abs(puissance));
+                val = -std::pow(std::abs(val), puissance);
             else
                 val = std::pow(val, puissance);
             if (((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 + val)<0.5f)
@@ -556,13 +563,13 @@ sil::Image normalisation(sil::Image im){//pourcentage
     {
         for (int y{0}; y < im.height(); ++y)
         {
-            if((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 > valMax){
-                valMax = (im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3;
-                //vecMax = glm::vec3{im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b};
+            if((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3.0f > valMax){
+                valMax = (im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3.0f;
+                //vecMax = glm::vec3{im.pixel(x, y).r,im.pixel(x, y).g,im.pixel(x, y).b};
             }
-            if((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3 < valMin){
-                valMin = (im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3;
-                //vecMin = glm::vec3{im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b};
+            if((im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3.0f < valMin){
+                valMin = (im.pixel(x, y).r+im.pixel(x, y).g+im.pixel(x, y).b)/3.0f;
+                //vecMin = glm::vec3{im.pixel(x, y).r,im.pixel(x, y).g,im.pixel(x, y).b};
             }
         }
     }
@@ -627,63 +634,6 @@ float outOfBound(float val, float taille){
     }
     return val;
 }
-/*void triangleDiamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax, bool mirror){
-    int tailleX = xmax-xmin;
-    int tailleY = ymax-ymin;
-    bool direc = tailleX < tailleY; 
-    float centre = 0.0f;
-    int xmid = xmin+(xmax-xmin)/2.0f;
-    int ymid = ymin+(ymax-ymin)/2.0f;
-    float temp;
-    if (direc){
-        temp = random_float(-0.125f, 0.125f);
-        if(mirror){
-            centre+=im.pixel(xmax,ymin).g;
-            centre+=im.pixel(xmax,ymax).g;
-            centre+=im.pixel(xmin,ymid).g;
-        }else{
-            centre+=im.pixel(xmin,ymin).g;
-            centre+=im.pixel(xmin,ymax).g;
-            centre+=im.pixel(xmax,ymid).g;
-        }
-    }else{
-        temp = random_float(-0.125f, 0.125f);
-        if(mirror){
-            centre+=im.pixel(xmin,ymin).g;
-            centre+=im.pixel(xmax,ymin).g;
-            centre+=im.pixel(xmid,ymax).g;
-        }else{
-            centre+=im.pixel(xmin,ymax).g;
-            centre+=im.pixel(xmax,ymax).g;
-            centre+=im.pixel(xmid,ymin).g;
-        }
-    }
-    centre = centre /3.0f + temp;
-    centre = outOfBound(centre, 1.0f);
-    int posX;
-    int posY;
-    if (direc){
-        posY = ymid;
-        if(mirror){
-            posX = xmax;
-        }else{
-            posX = xmin;
-        }
-    }else{
-        posX = xmid;
-        if(mirror){
-            posY = ymax;//bug posY
-        }else{
-            posY = ymin;
-        }
-    }
-//    std::cout << centre<< " et " << posY <<" min max "<< ymin <<" damn " << ymax << std::endl;
-    
-    if(im.pixel(posX,posY).g !=0.0f)
-        std::cout << posX << "ho no" << posY<< std::endl;
-    else
-        im.pixel(posX,posY) = glm::vec3{0.0f,centre,0.0f};
-}*/
 void triangleDiamond(sil::Image& im, int min, int max, bool isX, int axis, float rando){
     int taille = max-min; 
     float centre = 0.0f;
@@ -715,7 +665,7 @@ void triangleDiamond(sil::Image& im, int min, int max, bool isX, int axis, float
         //std::cout << posX << "ho no" << posY<< std::endl;
 }
 #define FACTEUR 1.5f
-void diamond2(sil::Image& im, int xmin, int ymin, int xmax, int ymax, float rando){
+void diamond2(sil::Image& im, int xmin, int ymin, int xmax, int ymax, float rando, float facteur){
     if (xmax-xmin <=1)
         return;
     int taille = xmax-xmin;
@@ -738,15 +688,15 @@ void diamond2(sil::Image& im, int xmin, int ymin, int xmax, int ymax, float rand
 //    triangleDiamond(im,xmid,ymin,xmax,ymax,true);
 //    triangleDiamond(im,xmin,ymin,xmax,ymid,false);
 //    triangleDiamond(im,xmin,ymid,xmax,ymax,true);
-    rando = rando/FACTEUR;
-    triangleDiamond(im, xmin, xmax, true, ymin, rando);
-    triangleDiamond(im, xmin, xmax, true, ymax, rando);
+    rando = rando/facteur;
+    triangleDiamond(im, xmin, xmax, true, ymin, rando );
+    triangleDiamond(im, xmin, xmax, true, ymax, rando );
     triangleDiamond(im, ymin, ymax, false, xmin, rando);
     triangleDiamond(im, ymin, ymax, false, xmax, rando);
-    diamond2(im, xmin, ymin, xmid, ymid, rando);
-    diamond2(im, xmid, ymin, xmax, ymid, rando);
-    diamond2(im, xmin, ymid, xmid, ymax, rando);
-    diamond2(im, xmid, ymid, xmax, ymax, rando);
+    diamond2(im, xmin, ymin, xmid, ymid, rando, facteur);
+    diamond2(im, xmid, ymin, xmax, ymid, rando, facteur);
+    diamond2(im, xmin, ymid, xmid, ymax, rando, facteur);
+    diamond2(im, xmid, ymid, xmax, ymax, rando, facteur);
 }
 sil::Image diamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
     if (xmax-xmin <=1)
@@ -766,12 +716,33 @@ sil::Image diamond(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
 //        std::cout << val<< std::endl;
         //centre+=val;
     }
-    diamond2(im, xmin, ymin, xmax, ymax, 0.5f/FACTEUR);
+    diamond2(im, xmin, ymin, xmax, ymax, 0.5f/FACTEUR, FACTEUR);
     return im;//normalisation(im);
 }
+sil::Image diamondRand(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
+    if (xmax-xmin <=1)
+        return im;
+    int taille = xmax-xmin;
+    float val;
+    float temp;
+    //float centre = 0.0f;
+    //int xmid = xmin+(xmax-xmin)/2.0f;
+    //int ymid = ymin+(ymax-ymin)/2.0f;
+    for(int i = 0; i <4; i++){
+        temp = random_float(-0.5f,0.5f);
+        val = (random_float(0.0f, (taille-1.0f)*2.0f))/(2*(taille-1.0f))+temp;
+        val = outOfBound(val, 1.0f);
 
+        im.pixel((i%2 == 0)?xmin:xmax,((i)/2 == 0)?ymin:ymax) = glm::vec3{0.0f,val,0.0f};
+//        std::cout << val<< std::endl;
+        //centre+=val;
+    }
+    diamond2(im, xmin, ymin, xmax, ymax, 0.f/FACTEUR, 1.0f);
+    return im;//normalisation(im);
+}
 sil::Image MapColoring(sil::Image im, glm::vec3 col1, glm::vec3 col2){
     float f;
+    //im = normalisation(im);
     for (glm::vec3& color : im.pixels())
     {
         if(color.g > 0.25f){
@@ -831,42 +802,6 @@ int main()
     sil::Image image3{"images/AshBaby.jpg"};
     sil::Image p{"images/pont.png"};
     sil::Image p2{"images/pont2.png"};
-    // TODO: modifier l'image
-    //image.save("output/pouet.png");
-    /* étoile 1
-        Green(image);
-        SwichChannel(image,"r","b");
-        SwichChannel(image,"g","r");
-        SwichChannel(image,"b","g");
-        SwichChannel(image,"r","r");
-        BlackWhite(image);
-        Negatif(image);
-        Degrad();
-    */
-    //DegradIm(image3);
-    //Miroir(image);
-    //Sound(image);
-    //Rotation(image);
-    //Dephasage(image);
-    //Luminosite(image2,  true);
-    //Disque(250,250,100);
-    //Cercle(10);
-    //AnimationDisqueEnter(250,250,100);
-    //Rosace(100,10.0f);
-    //RosaceCroissant(100,25.0f);
-    //Mosaique(image, 8);
-    //MosaiqueMirror(image, 8);
-//    for(int i =0; i < 100; i++){
-//        std::cout<<i<<std::endl;
-//        fractale1();
-//    }
- //   fractale2();
-    /*for(int i =0; i < 20; i++){
-        fractalepuissance(i, glm::vec3{ random_float(0.0f,1.0f),random_float(0.0f,1.0f),random_float(0.0f,1.0f)});
-    }*/
-   //MosaiqueMirrorBug(image3,1);
-   //DegradColor(glm::vec3{1.0f,0.0f,0.0f},glm::vec3{0.0f,1.0f,0.0f});
-   //DegradColor2(glm::vec3{1.0f,0.0f,0.0f},glm::vec3{0.0f,1.0f,0.0f});
 
    //tramageBasique(image2);
    //tramageBasique(p).save("output/Tramage/pon11.png");
@@ -881,10 +816,11 @@ int main()
    //tramageM4(p2, 2).save("output/pont32.png");
    //normalisation(image22).save("output/normal.png");;
    //vortex(image).save("output/vortex.png");
-   //int sizeD = 512+1;
-   //sil::Image diamonIm{sizeD,sizeD};
-   //diamond(diamonIm,0,0,sizeD-1,sizeD-1).save("output/diamond.png");
-   //MapColoring(diamonIm,glm::vec3{0.0f,0.0f,1.0f},glm::vec3{0.0f,1.0f,0.0f}).save("output/map.png");
+  // int sizeD = 512+1;
+  // sil::Image diamonIm{sizeD,sizeD};
+  // diamondRand(diamonIm,0,0,sizeD-1,sizeD-1).save("output/diamond.png");
+  // sil::Image map = MapColoring(diamonIm,glm::vec3{0.0f,0.0f,1.0f},glm::vec3{0.0f,1.0f,0.0f});
+  // map.save("output/map.png");
 
    //Green(test).save("output/test.png");
    //SwichChannel(test,"r","b","output/switch");SwichChannel(test,"g","r","output/switch");SwichChannel(test,"b","g","output/switch");SwichChannel(test,"r","r","output/switch");
@@ -899,11 +835,25 @@ int main()
     //Luminosite(test, false).save("output/test.png");    Luminosite(test, true).save("output/test2.png");
     //Disque(250,250,100).save("output/test.png");   Disque(100,250,50).save("output/test2.png");Disque(250,100,300).save("output/test3.png");
     //Cercle(250,250,100,25).save("output/test.png");   Cercle(100,250,50,1).save("output/test2.png");Cercle(250,100,50,300).save("output/test3.png");Cercle(250,100,50,-10).save("output/test4.png");
+    //Rosace(250,250.0f).save("output/test.png");
+    //RosaceCroissant(100,25.0f).save("output/test.png");
+    //Mosaique(test, 0).save("output/test.png");
+    //MosaiqueMirror(test, 0).save("output/test2.png");
+    //MosaiqueMirrorBug(test, 5).save("output/test.png");
+    //fractale2(3).save("output/test.png");
+    //fractale1(3).save("output/test.png");
+    //fractalepuissance(3.0f).save("output/test.png");
+   // DegradColor(glm::vec3{1.0f,0.0f,0.0f},glm::vec3{0.0f,1.0f,0.0f}).save("output/test.png");
+    //DegradColor2(glm::vec3{1.0f,0.0f,0.0f},glm::vec3{0.0f,1.0f,0.0f}).save("output/test.png");
+  //  normalisation(test).save("output/test.png");
+
+
     //tramageBasique(test).save("output/test.png");
     //tramage2(test, 1.0f).save("output/tramagePart2alea10.png");
     //pointillage(test, 1.5f).save("output/test.png");
-    //tramageM4(test, 1.0f).save("output/test.png");
-    std::cout << std::pow(0.6, 1.0f) << std::endl;
+    //tramageM4(test, 5.0f).save("output/test.png");
+    //std::cout << std::pow(0.6,1.5f) << std::endl;
+    //  tramage2(image3,.0).save("output/test.png");
 }
 //compil cmake .    puis    cmake --build .
 //exec ./ImageEditor
