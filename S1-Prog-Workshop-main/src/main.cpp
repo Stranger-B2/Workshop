@@ -239,11 +239,13 @@ sil::Image DisqueAnim(int centreX, int centreY, int r){
 void AnimationDisqueEnter(int centreX, int centreY, int r){
     if (centreX < 0 || centreY < 0 || r <0)
         return;
-    for(int i = 0; i < centreX; i+=3){
-        if(i >= 500)
+    int l = 0;
+    for(int i = -r-1; i < centreX; i+=3){
+        l++;
+        if(i >= 1000)
             return;
         std::string name("output/anim/animation");
-        name.append(std::to_string(i));
+        name.append(std::to_string(l));
         name.append(".png");
         DisqueAnim(i, centreY, r).save(name);
     }
@@ -737,7 +739,7 @@ sil::Image diamondRand(sil::Image& im, int xmin, int ymin, int xmax, int ymax){
 //        std::cout << val<< std::endl;
         //centre+=val;
     }
-    diamond2(im, xmin, ymin, xmax, ymax, 0.f/FACTEUR, 1.0f);
+    diamond2(im, xmin, ymin, xmax, ymax, 0.25f/2.0f, 1.0f);
     return im;//normalisation(im);
 }
 sil::Image MapColoring(sil::Image im, glm::vec3 col1, glm::vec3 col2){
@@ -816,11 +818,11 @@ int main()
    //tramageM4(p2, 2).save("output/pont32.png");
    //normalisation(image22).save("output/normal.png");;
    //vortex(image).save("output/vortex.png");
-  // int sizeD = 512+1;
-  // sil::Image diamonIm{sizeD,sizeD};
-  // diamondRand(diamonIm,0,0,sizeD-1,sizeD-1).save("output/diamond.png");
-  // sil::Image map = MapColoring(diamonIm,glm::vec3{0.0f,0.0f,1.0f},glm::vec3{0.0f,1.0f,0.0f});
-  // map.save("output/map.png");
+   int sizeD = 512+1;
+   sil::Image diamonIm{sizeD,sizeD};
+   diamond(diamonIm,0,0,sizeD-1,sizeD-1).save("output/diamond.png");
+   sil::Image map = MapColoring(diamonIm,glm::vec3{0.0f,0.0f,1.0f},glm::vec3{0.0f,1.0f,0.0f});
+   map.save("output/map.png");
 
    //Green(test).save("output/test.png");
    //SwichChannel(test,"r","b","output/switch");SwichChannel(test,"g","r","output/switch");SwichChannel(test,"b","g","output/switch");SwichChannel(test,"r","r","output/switch");
@@ -835,6 +837,7 @@ int main()
     //Luminosite(test, false).save("output/test.png");    Luminosite(test, true).save("output/test2.png");
     //Disque(250,250,100).save("output/test.png");   Disque(100,250,50).save("output/test2.png");Disque(250,100,300).save("output/test3.png");
     //Cercle(250,250,100,25).save("output/test.png");   Cercle(100,250,50,1).save("output/test2.png");Cercle(250,100,50,300).save("output/test3.png");Cercle(250,100,50,-10).save("output/test4.png");
+    //AnimationDisqueEnter(750,250,200);
     //Rosace(250,250.0f).save("output/test.png");
     //RosaceCroissant(100,25.0f).save("output/test.png");
     //Mosaique(test, 0).save("output/test.png");
